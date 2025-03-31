@@ -1,0 +1,28 @@
+title: Simon's Blog
+email: contact@neokil.de
+description: Challenges of a tech-lead.
+author: Simon Schulte
+baseurl: ""
+url: "https://blog.neokil.de"
+
+theme: jekyll-theme-clean-blog
+
+# Social Profiles
+#twitter_username:
+github_username: Neokil
+#facebook_username:
+#instagram_username:
+#linkedin_username:
+
+# Add your google-analytics ID here to activate google analytics
+#google_analytics: # out your google-analytics code
+
+# Build settings
+markdown: kramdown
+paginate: 5
+paginate_path: "/posts/page:num/"
+plugins:
+  - jekyll-feed
+  - jekyll-paginate
+  - jekyll-sitemap ## Uncomment this line to silently generate a sitemaps.org compliant sitemap for your Jekyll site
+

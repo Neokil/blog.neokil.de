@@ -2,7 +2,7 @@
 layout: post
 title: "Quirks of go - Part 1"
 subtitle: "Lets go over some quirky behaviour of golang..."
-date:   2025-04-01 13:00:00 +0200
+date:   2025-04-01 14:00:00 +0200
 categories: general
 ---
 

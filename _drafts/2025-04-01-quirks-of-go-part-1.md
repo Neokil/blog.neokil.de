@@ -6,45 +6,62 @@ date:   2025-04-01 13:00:00 +0200
 categories: general
 ---
 
-# Quirks of go - Part 1
-In my recent years of developing golang applications I found ran into some weird behaviours a few times. Recently I started collecting them and will present you some of the weird go quirks that I found and how to work around them.
+# Quirks of Go - Part 1
 
-## time.AddDate
-Lets start with `time.AddDate`. Quite a simple function you would think, it takes your current date and adds or subtracts the given number of days, months or years. But what happens if the target date does not exists? Lets go with an example:
-```
+Over the years of developing applications in Go, I have encountered some unexpected behaviors that can be quite puzzling at first glance. Recently, I started collecting these quirks and decided to share some of the more intriguing ones, along with potential workarounds.
+
+In this post, I will discuss two specific quirks: unexpected behavior when using `time.AddDate` and how Go's handling of `nil` types can lead to subtle bugs.
+
+## `time.AddDate`
+
+Let's start with `time.AddDate`, a seemingly simple function. It allows you to add or subtract a specified number of years, months, or days from a given date. However, what happens if the target date does not exist? Consider the following example:
+
+```go
 t1 := time.Date(2025, 3, 31, 0, 0, 0, 0, time.UTC)
 t2 := t1.AddDate(0, -1, 0)
 ```
-So we take a the last day of march and go back for one month. So what would you expect t2 to be? 31st of February? 28th of February? All wrong, the result is 3rd of March. But WTF? did we not tell it to go back one month? What did happen?
-What happened there is actually pretty simple to explain but not intuitive (at least to me). What is happening essentially is that it subtracts the number of days that are in the month that you want to subtract.
-So in this case we removing the days of february which is 28 days from the current date which results in 3rd of March.
 
-This quirk also exists if we do it the other way round:
-```
+Here, we take the last day of March and attempt to subtract one month. What would you expect `t2` to be? The 31st of February? The 28th of February? Surprisingly, the result is the **3rd of March**.
+
+### Why does this happen?
+
+The reason for this behavior lies in how Go's `time` package handles date arithmetic. Instead of performing a strict "month subtraction," it subtracts the number of days in the month being removed. In this case, February 2025 has 28 days, so subtracting one month from March 31st effectively moves the date back by 28 days, landing on March 3rd.
+
+This issue also occurs in the opposite direction:
+
+```go
 t1 := time.Date(2025, 3, 31, 0, 0, 0, 0, time.UTC)
-t2 := t1.AddDate(0, -1, 0)
+t2 := t1.AddDate(0, 1, 0)
 ```
-When we execute that we actually get 1st of May. So we added the number of days in March to the time.
 
-In my experience there is no easy general way of working around that. So you can use functions like:
-```
+Here, instead of arriving at April 30th, the result is **May 1st** because 31 days (the length of March) are added.
+
+### Handling the Issue
+
+There is no straightforward way to universally prevent this behavior, but you can check the number of days in a given month to better handle cases where dates might fall outside expected ranges:
+
+```go
 func daysIn(m time.Month, year int) int {
     return time.Date(year, m+1, 0, 0, 0, 0, 0, time.UTC).Day()
 }
 ```
-To check how many days a specific month has to then handle the dates that are falling out of that range.
 
-But in general the better approach is to rethink your solution to eliminate those weird cases because also users could get confused for example "what happens in February if I schedule this to run at the 31st of each month?".
-For example if you allow your users to create a schedule it might make sense to instead of giving them the option to freely select a start-date for a monthly interval to give them the option to choose between "X days after month start" and "X days before month ends".
-Both of those can be easily and reliably implemented and are also clear to the user:
-```
-3daysAfterMonthStarts := time.Date(year, month, 3, 0, 0, 0, 0, time.UTC)
-3daysBeforeMonthEnds := time.Date(year, month+1, -3, 0, 0, 0, 0, time.UTC)
+However, in most cases, it's better to **rethink the logic** that leads to such edge cases. For instance, if your application involves scheduling, consider giving users the option to schedule tasks as **"X days after the start of the month"** or **"X days before the end of the month"** instead of allowing arbitrary day selections.
+
+This approach ensures clarity for users and avoids unexpected shifts in date calculations:
+
+```go
+threeDaysAfterStart := time.Date(year, month, 3, 0, 0, 0, 0, time.UTC)
+threeDaysBeforeEnd := time.Date(year, month+1, -3, 0, 0, 0, 0, time.UTC)
 ```
 
-## Nil-Types
-I was working on an old project and the error handling there was not done super well and we had a lot of instances where we would simply return the function result without checking like this:
-```
+---
+
+## `nil` and Type Mismatches
+
+While working on an older project, I encountered an issue where error handling was not done properly. The code followed this pattern:
+
+```go
 func f1() *wire.Error {
     //...
     return nil
@@ -60,27 +77,63 @@ func main() {
         fmt.Println("error is nil")
         return
     }
-    fmt.Println(err.Error())
+    fmt.Println(err.Error()) // Panic occurs here
 }
 ```
-So if you are not seeing the problem I feel you, as I did not see any problems with that as well but somehow the println was failing with a nil-pointer panic. But didn't we check for nil just a few lines before that? Yes, but that is where nil-types are coming into perspective.
-Every value in golang has a type attached to it. Even nil-values. So if we look at the if-condition and annotate the types to it it looks like this:
+
+At first glance, there seems to be nothing wrong. The `if err == nil` check should prevent any issues, right? However, the program **still panicked with a nil-pointer error**.
+
+### Understanding `wire.Error`
+
+Before diving into the root cause, let's define `wire.Error`. This is a custom error type that provides additional information beyond a standard error:
+
+```go
+type wire.Error struct {
+    Code    int
+    Message string
+}
+
+func (e *wire.Error) Error() string {
+    return fmt.Sprintf("Error %d: %s", e.Code, e.Message)
+}
 ```
-if [*wireError, nil] == [error, nil] {
+
+### Understanding the Issue
+
+The problem stems from Go's handling of `nil` values and interfaces. In Go, every value has a specific type, including `nil`. If we annotate the types in the conditional check, it looks like this:
+
+```go
+if [*wire.Error, nil] == [error, nil] {
     ...
 }
 ```
-and suddenly it is clear that those values are not the same. But how did this happen? 
-The problem lies within the `f2` function. In this function we are just returning the result of `f1` without checking for a nil value. So if the `[*wire.Error, nil]` value gets returned from `f1` we are just passing it down, which causes our unexpected type-missmatch later on.
 
-So how do we fix it? Pretty simple by not piping functions but handling them and returning only the result or nil. The `f2` function was rewritten to this:
-```
+Since `error` is an interface type and `*wire.Error` is a concrete pointer type, these values are **not** considered equal, even though both hold `nil`.
+
+### Root Cause
+
+The issue originates in `f2`, which simply returns the result of `f1()` without checking for `nil`. When `f1()` returns `(*wire.Error)(nil)`, `f2` casts it to `error`. At this point, the **interface itself is not nil**, even though the underlying pointer is. This subtle difference leads to the panic when trying to call `err.Error()`.
+
+### The Fix
+
+To avoid this issue, **always check for nil before returning an interface type**. The corrected version of `f2` ensures that a true `nil` value is returned if `f1()` returns `nil`:
+
+```go
 func f2() error {
-    err = f1()
+    err := f1()
     if err != nil {
         return err
     }
-    return nil // implicitly typed by function signature
+    return nil // Explicitly return a true nil
 }
 ```
-and with that everything suddenly behaved as expected. So be careful of what you are returning in your functions as nil-values might cause an issue down the line.
+
+With this fix, `err == nil` behaves as expected, and the program will no longer panic.
+
+---
+
+## Conclusion
+
+Go is a powerful and efficient language, but it has its quirks—especially when dealing with date calculations and `nil` types. Understanding these behaviors can help prevent subtle bugs and unexpected issues in your applications.
+
+These are just two of the many interesting quirks I have encountered. Stay tuned for the next part, where I'll cover more unique behaviors in Go!

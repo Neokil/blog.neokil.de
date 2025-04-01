@@ -1,1 +1,0 @@
-drafts are unpublished posts

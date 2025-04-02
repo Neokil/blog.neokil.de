@@ -5,7 +5,7 @@ author: Simon Schulte
 baseurl: ""
 url: "https://blog.neokil.de"
 
-theme: jekyll-theme-clean-blog
+#theme: jekyll-theme-clean-blog
 
 # Social Profiles
 #twitter_username:

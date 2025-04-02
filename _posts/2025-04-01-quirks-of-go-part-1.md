@@ -3,7 +3,7 @@ layout: post
 title: "Quirks of go - Part 1"
 subtitle: "Exploring Go's Subtle Behaviors: Unexpected Edge Cases and How to Navigate Them"
 date:   2025-04-01 16:00:00 +0200
-categories: general golang
+categories: general golang quirks-of-go
 ---
 
 # Quirks of Go - Part 1

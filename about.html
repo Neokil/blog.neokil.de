@@ -7,17 +7,31 @@ background: '/img/bg-about.jpg'
 <style>
     .profile-container {
       float: left;
-      margin-right: 15px;
+      margin: 30px 30px 30px 0;
     }
     .profile-container img {
       max-width: 300px; /* Adjust size as needed */
       height: auto;
     }
+
+    /* Responsive Design: Stack image above text on smaller screens */
+    @media (max-width: 600px) {
+      .profile-container {
+        float: none;
+        display: block;
+        margin: 0 auto 15px; /* Center image and add space below */
+        text-align: center;
+      }
+
+      p {
+        text-align: center;
+      }
+    }
   </style>
   
-  <p class="profile-container">
+  <div class="profile-container">
     <img src="/img/Profile.png" alt="Profile-Image" />
-  </p>
+  </div>
   
   <p>I am Simon Schulte, a Tech Lead at Talon.One, specializing in backend development and system architecture. My expertise encompasses Golang, PostgreSQL, Google Cloud Platform (GCP), and Terraform, with a strong focus on designing and implementing scalable, high-performance solutions.</p>
   <p>With experience in software development since 2016, I have held positions as a Senior Golang Developer and Tech Lead across multiple organizations.</p>

@@ -2,12 +2,12 @@
 #mainNav {
     position: absolute;
     border-bottom: 1px solid $gray-200;
-    background-color: white;
+    background-color: $background-color;
     font-family: $headings-font-family;
 
     .navbar-brand {
         font-weight: 800;
-        color: $gray-800;
+        color: $text-color;
     }
 
     .navbar-toggler {
@@ -15,7 +15,7 @@
         font-weight: 800;
         padding: 13px;
         text-transform: uppercase;
-        color: $gray-800;
+        color: $text-color;
     }
 
     .navbar-nav {

@@ -5,6 +5,12 @@ footer {
     .list-inline {
         margin: 0;
         padding: 0;
+
+        .fa-stack {
+            .fa-circle {
+                color: #ffffff50
+            }
+        }
     }
 
     .copyright {

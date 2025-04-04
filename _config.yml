@@ -15,7 +15,7 @@ github_username: Neokil
 linkedin_username: simon-schulte-96476b194
 
 # Add your google-analytics ID here to activate google analytics
-#google_analytics: # out your google-analytics code
+google_analytics: G-NFRGZ53FF6
 
 # Build settings
 markdown: kramdown

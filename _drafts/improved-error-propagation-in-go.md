@@ -8,7 +8,31 @@ categories: general golang error handling
 
 The way error propagation is commonly done in Go can be a bit noisy and often doesn't fully meet the needs of most developers.
 
-Wrapping an error message and adding some extra context can work, but it quickly becomes messy. Having a **stack trace** attached to the error right away makes understanding the error path much clearer. Also, being limited to just **string messages** forces developers to add extra debug and info logs — but this clutters the logs and doesn't link additional context directly to the error itself.
+In traditional Go error handling, we often use `fmt.Errorf` with `%w` to wrap errors. Over time, this can create very long and unreadable error messages. For example:
+
+```go
+err := fmt.Errorf("failed to load config: %w", 
+            fmt.Errorf("could not read file: %w", 
+                fmt.Errorf("permission denied")))
+
+// Error: failed to load config: could not read file: permission denied
+```
+
+This flattens into a long, nested message that's difficult to parse — especially once you add multiple layers deep into a production system.
+
+In contrast, a structured error approach could separate concerns neatly:
+
+```go
+err := errors.New("ConfigError", "failed to load config")
+err = errors.Annotate(err, "filename", "/etc/config.yaml")
+```
+
+Here, you get:
+- A **clear message** (`failed to load config`)
+- A **kind/type** (`ConfigError`)
+- **Extra context** (`filename: /etc/config.yaml`)
+
+Instead of digging through wrapped strings, you can query structured fields or use them directly in logs, UIs, or debugging tools. Combined with a stacktrace this would contain all the information required to debug issues effectively.
 
 Recently, I came across an article by Michael Olofinjana: [Golang Error Handling: A Practical and Robust Solution](https://dev.to/michaelolof_/golang-error-handling-a-practical-and-robust-solution-3am1).  
 There were some very good ideas in it, especially the "Good error reporting" checklist:
@@ -23,8 +47,6 @@ While I agree with the checklist, I wasn't convinced by the proposed implementat
 For example, the use of timestamps felt unnecessary — you can simply use `runtime.Callers` to generate a stack trace automatically, which is much more helpful and requires less manual work.
 
 Also, for point 4 (attaching useful data), I expected something like an `error.Annotate(name string, data any)` functionality — but that was missing entirely.
-
----
 
 ## What Do We Actually Need?
 

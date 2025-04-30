@@ -1,55 +1,37 @@
 ---
 layout: post
-title: "Lets take a chunk from that"
-subtitle: "..."
+title: "How to Refactor Legacy Applications"
+subtitle: "Refactor smarter, not harder - one bite at a time"
 date:   2025-04-01 16:00:00 +0200
 categories: general golang refactoring
 ---
 
-Explain how refactoring legacy applications can work if you take one piece out at a time.
-Example message-broker.
-Things that don't change will be left as they are.
-Things that change frequently will be refactored and extracted (either into package or their own repo)
+# Why Do We Refactor?
+Refactoring legacy code is like reorganizing a messy toolbox. At first glance, it may seem unnecessary, especially when things technically still "work." But the benefits arise quickly. A cleaner structure makes it easier to understand what's going on, simplifies the process of changing or updating functionality, and drastically improves the ability to integrate new features. It also has a significant impact on debugging — clearer code makes it far easier to identify and resolve issues. Ultimately, the time you invest in thoughtful refactoring pays for itself by reducing the cost of maintenance and making development faster and less error-prone in the long term.
 
-Structure:
-1. Why do we refactor?
-    - makes the code easier to understand
-    - make it easier to update/change existing functionality
-    - make it easier to integrate new features
-    - make debugging and bug-hunting easier
-    - all of that reduces the maintenance and development cost in the long run
-    - its like reorganising your toolbox. You invest a bit of time now to be faster and more efficient later on.
-2. Why dont we refactor?
-    - we don't refactor to increase performance (but it could be a positive side effect)
-    - we don't refactor to solve bugs (this should be done in a bug-ticket outside of the refactoring process)
-3. Problems with refactoring big legacy projects
-    - Test-Coverage is most of the time really bad
-    - Unknown/Magic dependencies
-    - a lot of dependencies between project packages
-    - risk of breaking existing features is quite high
-    - non-modular architecture makes it hard to contain changes
-4. How to refactor? Like you would eat an elephant. Piece by Piece
-    - To determine where to start with the refactoring IMO there is one important metric: How often does this code change?
-        - Was the code not changed for a long time? Then what benefit are you expecting from changing it now? If there is no real benefit then the risk of changing is always winning and you should leave it.
-            ->  exceptions could be if you are changing some underlying project structure and you need to change some packages to fit that
-            ->  another exception could be if the code is really complicated to debug and needs to be investigated when debugging a lot. 
-                An example would be if you have a webserver which contains a function that maps routes to handlers and whenever you debug you have to go through that function.
-        - Is the code frequently changed? If so can we expect an improvement by refactoring it? Does it outweight the risk that we break something?
-    - If we have found the part of the code that we want to refactor we need to ask ourself if we can break it down into smaller tasks. If you can break it down you need to reevaluate every task again if you want to refactor it.
-      if it does not make sense to split the refactoring into smaller chunks we can start. From my experience it is better to finish some very small refactorings then start a big one that will never be finished.
-      We need to keep in mind that after we refactor the change most likely needs to be reviewed, tested and approved and while that is happening the regular development continues.
-      The bigger our refactoring is and the longer our review-process takes, the higher the chance that there are conflicts when its time to merge and that we need to update the refactoring and start the process all over again.
-      So IMO every task of refactoring should have a developing-time of less than one day. Everything above that has caused a lot of problems.
-5. But how do I start? With Tests!
-    - The biggest problem with refactorings is that they often break existing functionality. To keep the risk of breaking something small I suggest you start with adding some tests that test happy and unhappy paths.
-    - The more time we invest now into writing tests for the current behaviour the faster the review+test process will be and the smaller the risk of the refactoring actually becomes
-6. Can we now start with refactoring?
-   Yes! We can finally start with refactoring. If possible I would recommend to focus on two things:
-    1. Move the functionality into an isolated package. This package should have few to no static dependencies (use interfaces and dependency-injection for those) and follow the single-responsibility-principle.
-       Make sure you have the new package covered with unittests. This can then be injected into the existing code using dependency injection.
-       This sometimes means that you are sometimes left with a nearly empty function that only take the dependency, calls it and does some transformation.
-       This completely fine and you should only try to remove the function and move the changes further up the hierarchy if the changes are super small. If not create a followup-ticket to look into this later. 
-       The last thing we want to do now is to run into the trap of bloating the scope and then not finishing the ticket.
-    2. Boring is good. Was there an abstraction-layer that could be replaces with a simple switch-case? Are there generic functions that then use a switch-case on the type? Remove them and replace them with plain and simple code.
-       We dont want to write clever code we want to write code as boring as possible.
-       "But what if we need that flexibility later?" in short, in 99% of the case you won't. So must remove it and if you actually need it THEN it is time to develop it. If the code is plain, boring and tested then adding flexibility later on will be simple.
+# Why Don't We Refactor?
+That said, it's important to understand what refactoring is *not* about. It's not a performance optimization strategy—while performance may improve as a side effect, that's not the primary goal. Similarly, refactoring isn't meant to fix bugs. Bug fixing should be handled separately through targeted bug tickets, not hidden within structural changes. Mixing the two adds confusion and risk.
+
+# The Challenges of Refactoring Legacy Code
+Legacy applications often come with their own unique set of problems. Frequently, test coverage is either minimal or completely missing. Dependencies between components may be poorly documented or downright magical in nature. Many systems suffer from tight coupling between modules, making changes hard to isolate. In such a brittle environment, even small modifications can have far-reaching and unintended side effects. Non-modular architectures only make things worse by making it difficult to make changes in isolation. These factors create an environment where any refactoring carries significant risk.
+
+# How to Approach Refactoring
+So how do you actually tackle a legacy refactoring? The best advice I have is to approach it like you would eat an elephant — one bite at a time. You don't try to rewrite the entire application. Instead, you work incrementally, guided by a simple but powerful principle: refactor where it hurts most.
+
+To identify where to begin, look at how frequently a piece of code changes. If a section hasn't been touched in years, it's probably best left alone unless you're changing core architecture or find yourself repeatedly debugging the same painful function. On the other hand, if a file or function sees frequent changes, that's often a strong indicator that it could benefit from refactoring. The goal is to improve the parts of the system that you interact with the most, where the benefits of cleaner code will be felt immediately.
+
+Once you've found a good candidate, see if you can break the task into smaller, more manageable pieces. Each one should be evaluated on its own. Just because a it is technically possible to refactor doesn't mean it's worth doing. From experience, it's far more productive to complete a few small, well-scoped refactoring tasks than to start a large one that never gets finished. Remember: the larger the change, the longer it takes to review, test, and approve and during that time, regular development continues, increasing the chance of merge conflicts and outdating your effort. Ideally, a single refactoring task should take less than a day to complete. Anything longer tends to cause more problems than it solves.
+
+# Where Do I Start? With Tests!
+Before diving into code changes, your first step should be to write tests. One of the biggest dangers in refactoring is to break existing behavior. By writing tests for both the expected (happy path) and edge-case scenarios, you create a safety net that allows you to refactor with confidence. The more thorough your test coverage, the smoother your review process will be and the smaller your risk of regression becomes.
+Sometimes you will have to do some refactoring to be able to test properly. Like replacing static dependencies with interfaces. Keep them as small as possible so their risk stays small as well.
+
+# The Refactor Itself
+When the time to refactor is finally there, I recommend focusing on two things:
+
+First, try to extract the target functionality into an isolated package. This package should have a single responsibility, few to no static dependencies, and be built with interfaces and dependency injection in mind. It should also be well-tested on its own. Once it's ready, inject it into the existing system. You might end up with a nearly empty wrapper function that just forwards a call—that's totally fine. Resist the urge to "finish the job" by climbing higher up the call hierarchy as this is never as trivial as it seems. If you see future potential, log a follow-up task. Don't let the scope of your refactor get out of control.
+
+Second, embrace boring code. It's tempting to get clever with abstractions, but simplicity wins. If there's a complicated layer of indirection that could be replaced with a straightforward `switch` or some plainly structured logic, do it. Don't hang on to generic patterns "just in case." In reality, the need for flexible abstractions is rare. And if that day ever comes, it's easier to add complexity to clean code than to untangle overly abstract nonsense later on.
+
+# Final Thoughts
+Refactoring legacy applications doesn't have to be painful. With a focused mindset, an eye on the most frequently touched areas, and a bias toward boring but testable solutions, you can steadily modernize even the messiest codebases. Start small, stay disciplined, and take one bite at a time.

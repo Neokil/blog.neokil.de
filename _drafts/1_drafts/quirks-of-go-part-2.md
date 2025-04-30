@@ -1,18 +1,19 @@
 ---
 layout: post
-title: "Quirks of go - Part 2"
-subtitle: "..."
+title: "Quirks of Go - Part 2"
+subtitle: "Unexpected behavior with nil pointers and slice appends"
 date:   2025-04-01 16:00:00 +0200
 categories: general golang quirks-of-go
 ---
 
-1. function calls on nil-pointers
-One thing that was really weird to me coming from an object oriented language was the fact that a function that a method on a pointer in go can be called even if the pointer is nil.
-Let have an example:
-```
+# 1. Method Calls on Nil Pointers
+Coming from an object-oriented background, one of the quirks in Go that really caught me off guard was that it's possible to call a method on a nil pointer. Let's look at an example:
+
+```go
 type foo struct {
     Text string
 }
+
 func (f *foo) Bar() string {
     return f.Text
 }
@@ -23,54 +24,65 @@ func main() {
     fmt.Println(text)
 }
 ```
-What I would expect to happen is that in line 22 we get a nil-pointer-panic becuase f is nil but thats not the case.
-What we actually get is a nil-pointer-panic in line 17. Because it is not a probem to call a function on a nil-pointer, the panic only occurs when we try to access properties of nil.
-So what can we learn from this? first don't use pointers if you don't have to and second if you use pointers always check for nil.
 
-2. appending to slices that were created from part of other slices
-When working with slices this can be a real head-scratcher. Lets imagin we have the following scenario:
-```
-func getElementsAndAppend(originalSlice []int, numOfElementsToGet int, elementToAppend int) {
+You might expect the call to `f.Bar()` in `main()` to immediately trigger a nil pointer panic, since `f` is clearly nil. But surprisingly, that's not what happens.
+
+In Go, calling a method on a nil receiver is valid—**as long as the method doesn't dereference the pointer**. In the example above, the panic doesn't occur at the point of calling `f.Bar()`, but inside the `Bar()` method when it tries to access `f.Text`. That's where the nil dereference happens.
+
+**What's the takeaway?**  
+If you don't explicitly need pointer semantics, avoid them. But if you do use pointer receivers, always check for nil before accessing struct fields or calling other methods.
+
+
+# 2. Appending to Slices Created from Sub-Slices
+Another head-scratcher in Go involves appending to slices that are derived from parts of other slices. It's easy to make assumptions here that can lead to subtle bugs. Consider the following code:
+
+```go
+func getElementsAndAppend(originalSlice []int, numOfElementsToGet int, elementToAppend int) []int {
     result := originalSlice[:numOfElementsToGet]
     result = append(result, elementToAppend)
-
     return result
 }
 
 func main() {
-	numbers := []int{1, 2, 3, 4, 5}
-	result := getElementsAndAppend(numbers, 2, 99)
-	fmt.Println(numbers)
-	fmt.Println(result)
+    numbers := []int{1, 2, 3, 4, 5}
+    result := getElementsAndAppend(numbers, 2, 99)
+    fmt.Println(numbers)
+    fmt.Println(result)
 }
 ```
-What would you expect?
+
+You might expect the output to be:
 ```
 [1 2 3 4 5]
 [1 2 99]
 ```
-But the real result is
+
+But the actual result is:
 ```
 [1 2 99 4 5]
 [1 2 99]
 ```
 
-So what happened there? When copying the slice the underlying array was reused. So the same memory is now used by both slices but they have a different sizes.
-But that means if we append to the shorter slice it will overwrite items in the longer slice.
+Why? Because when you slice `originalSlice[:2]`, you're creating a new slice that shares the **same underlying array** as `originalSlice`. When `append` is called and there's still capacity left in that array, Go reuses it. So instead of allocating a new array, `append` modifies the existing one, in this case overwriting the third element with `99`.
 
-How do we solve that?
-Instead of reusing the original slice we have to create a new one and actually copy over the elements. We can do that by rewriting the function as follows:
-```
+To avoid this, you need to explicitly create a new slice with its own backing array and copy the contents over:
+
+```go
 func getElementsAndAppend(originalSlice []int, numOfElementsToGet int, elementToAppend int) []int {
-	result := make([]int, numOfElementsToGet)
-	copy(result, originalSlice[:numOfElementsToGet])
-	result = append(result, elementToAppend)
-
-	return result
+    result := make([]int, numOfElementsToGet)
+    copy(result, originalSlice[:numOfElementsToGet])
+    result = append(result, elementToAppend)
+    return result
 }
 ```
-with that we have the expected output of 
+
+Now, the output is exactly as expected:
 ```
 [1 2 3 4 5]
 [1 2 99]
 ```
+
+# Conclusion
+Go is simple, but it's not without its traps, especially if you're coming from other languages. Understanding how pointers and slices behave under the hood can help you avoid unexpected bugs and write safer, more predictable code.
+
+Stay tuned for Part 3!

@@ -2,7 +2,7 @@
 layout: post
 title: "Improving Error Propagation in Go"
 subtitle: "A Practical Approach"
-date:   2025-04-01 16:00:00 +0200
+date:   2025-05-19 15:00:00 +0200
 categories: general golang error handling
 ---
 

@@ -1,12 +1,21 @@
 ---
 layout: post
 title: "Quirks of Go - Part 2"
-subtitle: "Unexpected behavior with nil pointers and slice appends"
-date:   2025-04-01 16:00:00 +0200
+subtitle: "Nil Pointers and Slice Append Pitfalls in Go: How They Really Work"
+description: "Go allows method calls on nil pointers and reuses backing arrays when appending to slices—learn how these quirks can trip you up and how to avoid subtle bugs."
+date:   2025-06-24 08:00:00 +0200
 categories: general golang quirks-of-go
 ---
 
-# 1. Method Calls on Nil Pointers
+Go is often praised for its simplicity, but beneath the surface lie some behaviors that can surprise even experienced developers. In this post, we'll look at two quirks involving nil pointers and slice manipulation that could easily lead to bugs if you're not careful.
+
+# TL;DR
+- Go allows method calls on nil pointers **if** the method doesn't access struct fields.
+- Slices created from sub-slices may share memory. Appending to them can unexpectedly modify the original slice.
+- Always be aware of pointer dereferencing and slice capacity when working with Go.
+
+
+# 1. Calling Methods on Nil Pointers in Go
 Coming from an object-oriented background, one of the quirks in Go that really caught me off guard was that it's possible to call a method on a nil pointer. Let's look at an example:
 
 ```go
@@ -33,7 +42,7 @@ In Go, calling a method on a nil receiver is valid—**as long as the method doe
 If you don't explicitly need pointer semantics, avoid them. But if you do use pointer receivers, always check for nil before accessing struct fields or calling other methods.
 
 
-# 2. Appending to Slices Created from Sub-Slices
+# 2. The Hidden Danger of Appending to Sub-Slices
 Another head-scratcher in Go involves appending to slices that are derived from parts of other slices. It's easy to make assumptions here that can lead to subtle bugs. Consider the following code:
 
 ```go
@@ -86,3 +95,10 @@ Now, the output is exactly as expected:
 Go is simple, but it's not without its traps, especially if you're coming from other languages. Understanding how pointers and slices behave under the hood can help you avoid unexpected bugs and write safer, more predictable code.
 
 Stay tuned for Part 3!
+
+## More from the Quirks of Go Series
+{% for post in site.categories.quirks-of-go reversed %}
+{% unless post == page %}
+[{{ post.title }} - {{ post.subtitle}}]({{post.url}})
+{% endunless %}
+{% endfor %}

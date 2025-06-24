@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Quirks of go - Part 1"
+title: "Quirks of Go - Part 1"
 subtitle: "Exploring Go's Subtle Behaviors: Unexpected Edge Cases and How to Navigate Them"
 date:   2025-05-01 00:00:00 +0200
 categories: general golang quirks-of-go
@@ -137,3 +137,10 @@ With this fix, `err == nil` behaves as expected, and the program will no longer 
 Go is a powerful and efficient language, but it has its quirks—especially when dealing with date calculations and `nil` types. Understanding these behaviors can help prevent subtle bugs and unexpected issues in your applications.
 
 These are just two of the many interesting quirks I have encountered. Stay tuned for the next part, where I'll cover more unique behaviors in Go!
+
+## More from the Quirks of Go Series
+{% for post in site.categories.quirks-of-go reversed %}
+{% unless post == page %}
+[{{ post.title }} - {{ post.subtitle}}]({{post.url}})
+{% endunless %}
+{% endfor %}

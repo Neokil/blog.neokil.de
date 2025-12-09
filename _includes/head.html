@@ -19,4 +19,37 @@
   <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
   <link rel="alternate" type="application/rss+xml" title="{{ site.title | escape }}" href="{{ "/feed.xml" | relative_url }}">
 
+  <style>
+    #lightbox {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(0,0,0,0.85); 
+      z-index: 9999999; 
+      line-height: 0; 
+      cursor: pointer; 
+      display: none;
+      padding: 5vh 5vw;
+    }
+    #lightbox img {
+      width: 90vw;
+      height: auto;
+      object-fit: contain;
+      position: absolute; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%)
+    }
+    #lightbox .close {
+      width: 5vw;
+      height: 5vw;
+      position: fixed;
+      right: 0;
+      top: 0;
+      padding: 1vh 1vw;
+    }
+  </style>
+
 </head>

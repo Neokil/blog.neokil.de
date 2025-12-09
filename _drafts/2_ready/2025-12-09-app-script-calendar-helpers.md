@@ -11,17 +11,18 @@ If you want the full reference, the official docs live at [developers.google.com
 
 ## What I'm Automating
 - Blockers around private appointments: I import a private calendar that's only visible to me and mirror those events into my work calendar with 15 minutes before and after blocked out. That buffer keeps me from sprinting between life and work.
-<img src="/img/posts/app-script-calendar-helpers-2.png" alt="Calendar view showing buffer blockers around a private appointment" style="max-width: 100%; height: auto;">
+<img src="/img/posts/app-script-calendar-helpers-example-1.png" alt="Calendar view showing buffer blockers around a private appointment" style="max-width: 100%; height: auto;" class="popout">
 - Meeting prep blockers: Before every non-recurring meeting, I drop in a 15-minute prep slot so I'm not jumping in cold.
-<img src="/img/posts/app-script-calendar-helpers-3.png" alt="Calendar view showing a 15-minute meeting prep slot before a meeting" style="max-width: 100%; height: auto;">
+<img src="/img/posts/app-script-calendar-helpers-example-2.png" alt="Calendar view showing a 15-minute meeting prep slot before a meeting" style="max-width: 100%; height: auto;" class="popout">
 
 ## First Steps with Apps Script
+<img src="/img/posts/app-script-calendar-helpers-workspace.png" alt="Apps Script UI with editor, triggers, and controls highlighted" style="max-width: 100%; height: auto;" class="popout">
 1. Go to [https://script.google.com/home](https://script.google.com/home) and create a new project. Give it a name, open the code view, and you're ready to type.
-   <img src="/img/posts/app-script-calendar-helpers-1.png" alt="Apps Script UI with editor, triggers, and controls highlighted" style="max-width: 100%; height: auto;">
 2. Click around for a minute: the left nav holds the editor and triggers, the top bar has run/debug/save. It's friendlier than it looks.
 3. Tap **Run** or **Debug** often — `console.log` is your friend — just remember these scripts can write to your calendar, so start small.
 4. Once it behaves, open the stopwatch icon on the left to go to **Triggers**.
 5. Click **Add trigger** in the bottom right, pick the function to run, choose a time-driven trigger (daily works well), and set the options.
+<img src="/img/posts/app-script-calendar-helpers-add-trigger-large.png" alt="Apps Script UI with editor, triggers, and controls highlighted" style="max-width: 100%; height: auto;" class="popout">
 6. Save it. From now on it runs on schedule without you babysitting.
 7. If you want to see what's been happening, head back to [https://script.google.com/home](https://script.google.com/home) — **My Executions** and **My Triggers** show a quick status.
 

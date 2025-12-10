@@ -2,7 +2,7 @@
 layout: post
 title: "Apps-Script Calendar Helpers"
 subtitle: "Automate your calendar with Google Apps Script"
-date:   2025-12-09 10:00:00 +0200
+date:   2025-12-10 12:00:00 +0100
 categories: general apps-script automation calendar
 ---
 

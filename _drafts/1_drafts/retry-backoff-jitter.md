@@ -156,5 +156,5 @@ That combination fit our notification workload better than a full-jitter strateg
 
 # References
 - AWS Architecture Blog: [Exponential Backoff and Jitter](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/)
-- Amazon Builders’ Library: [Timeouts, retries, and backoff with jitter](https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/)
+- Amazon Builders Library: [Timeouts, retries, and backoff with jitter](https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/)
 - Stripe Blog: [Designing robust and predictable APIs with idempotency](https://stripe.com/blog/idempotency)

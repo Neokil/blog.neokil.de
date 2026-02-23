@@ -3,7 +3,7 @@ layout: post
 title: "Retries, Backoff, and Jitter"
 subtitle: "How to stay resilient without DDoSing your dependencies"
 description: "A practical guide to retries: how backoff and jitter shape traffic during spikes, with lessons from a real notification-system incident."
-date:   2026-02-19 17:00:00 +0100
+date:   2026-02-24 08:00:00 +0100
 categories: general distributed-systems reliability
 ---
 
@@ -126,11 +126,10 @@ Also: only retry operations that are **idempotent** or protected by an idempoten
 Retries help with short-lived failures. They do not solve systemic overload by themselves.
 
 Pair retries with:
-- circuit breakers: prevent calls to unhealthy dependencies and allow fast failure while they recover.
-- load shedding: drop or defer non-critical work when the system is overloaded.
-- concurrency limits: cap in-flight requests so downstream systems are not saturated.
-- queues/buffers where appropriate: absorb short spikes and smooth bursty traffic over time.
-- proper observability (retry count, attempt latency, final failure reason): make retry behavior visible so you can tune policies and detect retry storms early.
+- circuit breakers to fail fast when a dependency is clearly unhealthy.
+- concurrency limits to cap in-flight work and avoid overload.
+- observability to track retry volume and success-after-retry.
+- and more, like queues or load shedding, depending on your system.
 
 If your dashboards do not show retry volume and success-after-retry rates, you are mostly flying blind.
 

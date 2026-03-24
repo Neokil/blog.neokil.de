@@ -2,7 +2,7 @@
 layout: post
 title: "Why I Built AutoPR"
 subtitle: "From ticket to PR without babysitting a terminal"
-date:   2026-03-23 10:00:00 +0100
+date:   2026-03-24 08:00:00 +0100
 categories: general ai developer-tools automation
 ---
 
